@@ -149,11 +149,13 @@
       text-decoration: none;
     }
 
-    .bottom-text:hover .bottom-default {
+    .bottom-text:hover .bottom-default,
+    .bottom-text.tapped .bottom-default {
       opacity: 0;
     }
 
-    .bottom-text:hover .bottom-contact {
+    .bottom-text:hover .bottom-contact,
+    .bottom-text.tapped .bottom-contact {
       opacity: 1;
     }
   </style>
@@ -214,7 +216,7 @@
           realRow.appendChild(span);
           ghostRow.appendChild(ghost);
 
-          span.addEventListener('mouseenter', () => {
+          function liftChar() {
             if (span.dataset.lifted) return;
             span.dataset.lifted = '1';
 
@@ -263,13 +265,28 @@
               easing: 'cubic-bezier(0.2, 0, 0.08, 1)',
               fill: 'forwards',
             });
-          });
+          }
+
+          span.addEventListener('mouseenter', liftChar);
+          span.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            liftChar();
+          }, { passive: false });
         }
       }
 
       centerBlock.appendChild(realRow);
       ghostBlock.appendChild(ghostRow);
     });
+
+    // Bottom text: tap to toggle contact info on touch devices
+    const bottomText = document.querySelector('.bottom-text');
+    bottomText.addEventListener('touchstart', (e) => {
+      // Allow tapping the email link itself to work normally
+      if (e.target.tagName === 'A') return;
+      e.preventDefault();
+      bottomText.classList.toggle('tapped');
+    }, { passive: false });
 
   </script>
 </body>
