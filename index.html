@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theingi Thann</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      background-color: #FFFDF7;
+      font-family: 'EB Garamond', serif;
+      font-size: 14px;
+      color: #BEBEBE;
+      letter-spacing: 0.06em;
+      overflow: hidden;
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+    }
+
+    /*
+      Grid overlay: center-block and ghost-block share the exact same
+      grid cell, so they are pixel-identical in position and centering
+      at every screen size. No fixed/absolute positioning needed for ghosts.
+    */
+    .text-container {
+      display: grid;
+      text-align: center;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .center-block,
+    .ghost-block {
+      grid-area: 1 / 1;
+      text-align: center;
+      user-select: none;
+    }
+
+    .ghost-block {
+      pointer-events: none;
+    }
+
+    @keyframes vellum-in {
+      0%   { opacity: 0.05; }
+      100% { opacity: 1; }
+    }
+
+    .line-row {
+      display: block;
+      line-height: 1.3;
+      opacity: 0;
+      animation: vellum-in 2.3s cubic-bezier(0.25, 0, 0.35, 1) forwards;
+    }
+
+    .line-row.italic {
+      font-style: italic;
+    }
+
+    /* Characters — inline-block so transform works */
+    .char {
+      display: inline-block;
+      position: relative;
+      font-weight: 350;
+    }
+
+    /* Spaces */
+    .char-space {
+      display: inline-block;
+      width: 0.3em;
+    }
+
+    /* Ghost characters: invisible until revealed */
+    .ghost-char {
+      display: inline-block;
+      position: relative;
+      color: rgba(190, 190, 190, 0.25);
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .ghost-space {
+      display: inline-block;
+      width: 0.3em;
+    }
+
+    .bottom-text {
+      position: fixed;
+      bottom: 36px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-style: italic;
+      font-weight: 350;
+      line-height: 1.3;
+      color: #BEBEBE;
+      cursor: default;
+      opacity: 0;
+      animation: vellum-in 2.3s cubic-bezier(0.25, 0, 0.35, 1) forwards;
+      animation-delay: 0.5s;
+    }
+
+    .bottom-default,
+    .bottom-contact {
+      display: block;
+      transition: opacity 1.8s ease;
+    }
+
+    .bottom-contact {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      opacity: 0;
+    }
+
+    .mobile-line { display: none; }
+
+    @media (max-width: 768px) {
+      .desktop-line { display: none; }
+      .mobile-line  { display: inline; }
+    }
+
+    .bottom-contact a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .bottom-text:hover .bottom-default {
+      opacity: 0;
+    }
+
+    .bottom-text:hover .bottom-contact {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="text-container">
+    <div class="center-block" id="centerBlock"></div>
+    <div class="ghost-block"  id="ghostBlock"  aria-hidden="true"></div>
+  </div>
+
+  <div class="bottom-text">
+    <span class="bottom-default">
+      temporary site<br>
+      <span class="desktop-line">thank you for being here!</span>
+      <span class="mobile-line">best interacted on desktop</span>
+    </span>
+    <span class="bottom-contact">
+      say hello :<br>
+      <a href="mailto:theingithann@gmail.com">theingithann@gmail.com</a>
+    </span>
+  </div>
+
+  <script>
+    const lineData = [
+      { text: 'Theingi Thann',                     italic: false },
+      { text: '(She/Her)',                          italic: true  },
+      { text: 'Design, Art Direction & Filmmaking', italic: false },
+    ];
+
+    const centerBlock = document.getElementById('centerBlock');
+    const ghostBlock  = document.getElementById('ghostBlock');
+
+    let charIndex = 0; // global counter for letter-by-letter stagger
+
+    lineData.forEach(({ text, italic }, i) => {
+      const realRow  = document.createElement('span');
+      const ghostRow = document.createElement('span');
+      realRow.className  = 'line-row' + (italic ? ' italic' : '');
+      ghostRow.className = 'line-row' + (italic ? ' italic' : '');
+
+      for (const ch of text) {
+        if (ch === ' ') {
+          const sp  = document.createElement('span');
+          const gsp = document.createElement('span');
+          sp.className  = 'char-space';
+          gsp.className = 'ghost-space';
+          realRow.appendChild(sp);
+          ghostRow.appendChild(gsp);
+        } else {
+          const span  = document.createElement('span');
+          const ghost = document.createElement('span');
+          span.className  = 'char';
+          ghost.className = 'ghost-char';
+          span.textContent  = ch;
+          ghost.textContent = ch;
+
+          realRow.appendChild(span);
+          ghostRow.appendChild(ghost);
+
+          span.addEventListener('mouseenter', () => {
+            if (span.dataset.lifted) return;
+            span.dataset.lifted = '1';
+
+            // Reveal the ghost copy underneath
+            ghost.style.opacity = '1';
+
+            // Upward drift with gentle sway
+            const upward = -Math.PI / 2;
+            const sway   = (Math.random() - 0.5) * Math.PI * 0.7;
+            const angle  = upward + sway;
+            const dist   = window.innerHeight * 1.1 + Math.random() * window.innerHeight * 0.5;
+            const tx     = Math.cos(angle) * dist;
+            const ty     = Math.sin(angle) * dist;
+            const rotate = (Math.random() - 0.5) * 18;
+
+            // Perpendicular axis for wind drift
+            const px = -Math.sin(angle);
+            const py =  Math.cos(angle);
+
+            // Each letter gets its own wind character —
+            // irregular gust amplitudes that build then settle
+            const g = () => (Math.random() - 0.5) * 2; // -1..1
+            const w = 10 + Math.random() * 14; // base gust width
+
+            // 10 waypoints along the path, each nudged by a
+            // different perpendicular gust amount for organic wind feel
+            const gusts = [0, g()*w*.5, g()*w, g()*w*1.2, g()*w*1.1,
+                           g()*w*.9, g()*w*.7, g()*w*.5, g()*w*.25, 0];
+
+            const duration = 11000 + Math.random() * 3000;
+
+            const frames = gusts.map((gust, i) => {
+              const t  = i / (gusts.length - 1);
+              const r  = rotate * Math.min(t * 1.4, 1);
+              // scale breathes very slightly — air pressure on the letter
+              const sc = 1 + Math.sin(t * Math.PI) * 0.018;
+              return {
+                offset:    t,
+                transform: `translate(${tx*t + px*gust}px, ${ty*t + py*gust}px) rotate(${r}deg) scale(${sc})`,
+                opacity:   t < 0.45 ? 1 : t < 0.75 ? 1 - (t - 0.45) / 0.45 : Math.max(0, 1 - (t - 0.45) / 0.35),
+              };
+            });
+
+            span.animate(frames, {
+              duration,
+              easing: 'cubic-bezier(0.2, 0, 0.08, 1)',
+              fill: 'forwards',
+            });
+          });
+        }
+      }
+
+      centerBlock.appendChild(realRow);
+      ghostBlock.appendChild(ghostRow);
+    });
+
+  </script>
+</body>
+</html>
